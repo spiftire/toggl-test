@@ -51,7 +51,7 @@ export const DragInput: FC = () => {
   )
 }
 const useDragInput = () => {
-  const { sendEmails, ...state } = useEmailSender()
+  const { sendEmails, reset, ...state } = useEmailSender()
   const [dragActive, setDragActive] = useState(false)
   const [emails, setEmails] = useState<ReadonlyArray<string>>()
   const [fileList, setFileList] = useState<FileList>()
@@ -74,6 +74,7 @@ const useDragInput = () => {
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      reset()
       setFileList(e.dataTransfer.files)
       extractEmails(e.dataTransfer.files)
     }
@@ -88,10 +89,12 @@ const useDragInput = () => {
     }
   }
 
-  const handleSendEmail = () => {
+  const handleSendEmail = async () => {
     if (emails !== undefined) {
       try {
-        sendEmails(emails)
+        await sendEmails(emails)
+        setFileList(undefined)
+        setEmails(undefined)
       } catch (err) {
         console.log(err)
       }
