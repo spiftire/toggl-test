@@ -19,7 +19,7 @@ export const DragInput: FC = () => {
         <input type="file" id="input-file-upload" multiple={true} onChange={handleChange} ref={inputRef} />
         <label id="label-file-upload" htmlFor="input-file-upload" className={dragActive ? 'drag-active' : ''}>
           <div>
-            <p>Drag and drop your file here or</p>
+            <p>Drag and drop your file containing emails here or</p>
             <button
               className="upload-button"
               onClick={(e) => {
@@ -27,7 +27,7 @@ export const DragInput: FC = () => {
                 inputRef.current?.click()
               }}
             >
-              Upload a file
+              Click here to upload a file
             </button>
           </div>
           {dragActive && (
@@ -43,9 +43,15 @@ export const DragInput: FC = () => {
       </form>
       {fileNames && (
         <>
-          <ul>
+          <h2>Files to upload</h2>
+          <ul style={{ listStyle: 'none' }}>
             {fileNames.map((fn) => (
-              <li key={fn}>{fn}</li>
+              <li
+                key={fn}
+                style={{ padding: '.5rem', border: 'solid lightgrey 1px', borderRadius: '.25rem', margin: ' .5rem 0' }}
+              >
+                {fn}
+              </li>
             ))}
           </ul>
           <button onClick={handleSendEmail} disabled={isLoading}>
