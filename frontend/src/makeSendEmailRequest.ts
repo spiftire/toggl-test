@@ -20,5 +20,3 @@ export const makeSendEmailsRequest = async (emails: ReadonlyArray<string>) => {
     throw err
   }
 }
-
-type APIError = { emails: string[]; error: 'send_failure' }
