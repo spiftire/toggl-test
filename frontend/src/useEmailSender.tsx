@@ -16,7 +16,7 @@ export const useEmailSender = () => {
       dispatch({ type: 'error', error })
     }
   }, [])
-  return { ...state, sendEmail: sendEmails }
+  return { ...state, sendEmails }
 }
 type ReducerActions =
   | { type: 'success' }

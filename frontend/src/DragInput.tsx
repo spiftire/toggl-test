@@ -48,7 +48,7 @@ export const DragInput: FC = () => {
   )
 }
 const useDragInput = () => {
-  const { sendEmail: sendEmails, ...state } = useEmailSender()
+  const { sendEmails, ...state } = useEmailSender()
   const [dragActive, setDragActive] = useState(false)
   const [emails, setEmails] = useState<ReadonlyArray<string>>()
   const [fileList, setFileList] = useState<FileList>()
