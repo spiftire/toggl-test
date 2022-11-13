@@ -1,11 +1,18 @@
-import { ChangeEventHandler, DragEventHandler, useRef, useState } from 'react'
+import { ChangeEventHandler, DragEventHandler, FC, useEffect, useRef, useState } from 'react'
 import './DragInput.css'
 
 /**
  * Inspired by https://www.codemzy.com/blog/react-drag-drop-file-upload
  */
-export const DragInput = () => {
-  const { handleDrag, dragActive, handleDrop, handleChange } = useDragInput()
+export const DragInput: FC<{ onEmailChange: (emails: ReadonlyArray<string>) => void }> = ({ onEmailChange }) => {
+  const { handleDrag, dragActive, handleDrop, handleChange, emails } = useDragInput()
+
+  useEffect(() => {
+    if (emails !== undefined) {
+      onEmailChange(emails)
+    }
+  }, [emails, onEmailChange])
+
   const inputRef = useRef<HTMLInputElement>(null)
   return (
     <form id="form-file-upload" onDragEnter={handleDrag}>
@@ -32,6 +39,7 @@ export const DragInput = () => {
 }
 const useDragInput = () => {
   const [dragActive, setDragActive] = useState(false)
+  const [emails, setEmails] = useState<ReadonlyArray<string>>()
 
   // handle drag events
   const handleDrag: DragEventHandler<HTMLFormElement | HTMLDivElement> = function (e) {
@@ -49,8 +57,7 @@ const useDragInput = () => {
     e.stopPropagation()
     setDragActive(false)
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      // at least one file has been dropped so do something
-      // handleFiles(e.dataTransfer.files);
+      extractEmails(e.dataTransfer.files)
     }
   }
 
@@ -58,10 +65,37 @@ const useDragInput = () => {
   const handleChange: ChangeEventHandler<HTMLInputElement> = function (e) {
     e.preventDefault()
     if (e.target.files && e.target.files[0]) {
-      // at least one file has been selected so do something
-      // handleFiles(e.target.files);
+      extractEmails(e.target.files)
     }
   }
 
-  return { handleDrag, dragActive, handleDrop, handleChange }
+  const extractEmails = (files: FileList) => {
+    const { length } = files
+    const emailSet = new Set<string>()
+    for (let index = 0; index < length; index++) {
+      const file = files[index]
+      if (file === null) {
+        continue
+      }
+      const reader = new FileReader()
+      reader.readAsText(file, 'UTF-8')
+      reader.onload = function (e) {
+        const result = e.target?.result as string
+        const lines = result.split('\n')
+        for (const line of lines) {
+          if (emailRegex.test(line)) {
+            emailSet.add(line)
+          }
+        }
+        setEmails(Array.from(emailSet))
+      }
+      reader.onerror = function (e) {
+        console.log(e)
+      }
+    }
+  }
+
+  return { handleDrag, dragActive, handleDrop, handleChange, emails }
 }
+
+const emailRegex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/
