@@ -1,4 +1,4 @@
-import { ChangeEventHandler, DragEventHandler, useState } from 'react'
+import { ChangeEventHandler, DragEventHandler, useCallback, useState } from 'react'
 import { useEmailSender } from './useEmailSender'
 
 export const useDragInput = () => {
@@ -10,7 +10,7 @@ export const useDragInput = () => {
   const fileNames = fileList && Array.from(fileList).map((f) => f.name)
 
   // handle drag events
-  const handleDrag: DragEventHandler<HTMLFormElement | HTMLDivElement> = function (e) {
+  const handleDrag: DragEventHandler<HTMLFormElement | HTMLDivElement> = useCallback((e) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -18,41 +18,9 @@ export const useDragInput = () => {
     } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
-  }
+  }, [])
 
-  const handleDrop: DragEventHandler<HTMLFormElement | HTMLDivElement> = function (e) {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      reset()
-      setFileList(e.dataTransfer.files)
-      extractEmails(e.dataTransfer.files)
-    }
-  }
-
-  // triggers when file is selected with click
-  const handleChange: ChangeEventHandler<HTMLInputElement> = function (e) {
-    e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      setFileList(e.target.files)
-      extractEmails(e.target.files)
-    }
-  }
-
-  const handleSendEmail = async () => {
-    if (emails !== undefined) {
-      try {
-        await sendEmails(emails)
-        setFileList(undefined)
-        setEmails(undefined)
-      } catch (err) {
-        console.log(err)
-      }
-    }
-  }
-
-  const extractEmails = (files: FileList) => {
+  const extractEmails = useCallback((files: FileList) => {
     const { length } = files
     const emailSet = new Set<string>()
     for (let index = 0; index < length; index++) {
@@ -76,7 +44,45 @@ export const useDragInput = () => {
         console.log(e)
       }
     }
-  }
+  }, [])
+
+  const handleDrop: DragEventHandler<HTMLFormElement | HTMLDivElement> = useCallback(
+    (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      setDragActive(false)
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        reset()
+        setFileList(e.dataTransfer.files)
+        extractEmails(e.dataTransfer.files)
+      }
+    },
+    [extractEmails, reset],
+  )
+
+  // triggers when file is selected with click
+  const handleChange: ChangeEventHandler<HTMLInputElement> = useCallback(
+    (e) => {
+      e.preventDefault()
+      if (e.target.files && e.target.files[0]) {
+        setFileList(e.target.files)
+        extractEmails(e.target.files)
+      }
+    },
+    [extractEmails],
+  )
+
+  const handleSendEmail = useCallback(async () => {
+    if (emails !== undefined) {
+      try {
+        await sendEmails(emails)
+        setFileList(undefined)
+        setEmails(undefined)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }, [emails, sendEmails])
 
   return { handleDrag, dragActive, handleDrop, handleChange, handleSendEmail, emails, fileNames, ...state }
 }
