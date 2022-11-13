@@ -1,17 +1,20 @@
 import { ChangeEventHandler, DragEventHandler, FC, useRef, useState } from 'react'
 import './DragInput.css'
 import { Spinner } from './Spinner'
+import { StatusMessage } from './StatusMessage'
 import { useEmailSender } from './useEmailSender'
 
 /**
  * Inspired by https://www.codemzy.com/blog/react-drag-drop-file-upload
  */
 export const DragInput: FC = () => {
-  const { handleDrag, dragActive, handleDrop, handleChange, fileNames, handleSendEmail, isLoading } = useDragInput()
+  const { handleDrag, dragActive, handleDrop, handleChange, fileNames, handleSendEmail, isLoading, error, status } =
+    useDragInput()
 
   const inputRef = useRef<HTMLInputElement>(null)
   return (
     <>
+      <StatusMessage status={status} error={error} />
       <form id="form-file-upload" onDragEnter={handleDrag}>
         <input type="file" id="input-file-upload" multiple={true} onChange={handleChange} ref={inputRef} />
         <label id="label-file-upload" htmlFor="input-file-upload" className={dragActive ? 'drag-active' : ''}>
