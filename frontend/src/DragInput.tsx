@@ -20,7 +20,13 @@ export const DragInput: FC = () => {
         <label id="label-file-upload" htmlFor="input-file-upload" className={dragActive ? 'drag-active' : ''}>
           <div>
             <p>Drag and drop your file here or</p>
-            <button className="upload-button" onClick={() => inputRef.current?.click()}>
+            <button
+              className="upload-button"
+              onClick={(e) => {
+                e.preventDefault()
+                inputRef.current?.click()
+              }}
+            >
               Upload a file
             </button>
           </div>
