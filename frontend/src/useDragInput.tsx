@@ -65,11 +65,12 @@ export const useDragInput = () => {
     (e) => {
       e.preventDefault()
       if (e.target.files && e.target.files[0]) {
+        reset()
         setFileList(e.target.files)
         extractEmails(e.target.files)
       }
     },
-    [extractEmails],
+    [extractEmails, reset],
   )
 
   const handleSendEmail = useCallback(async () => {
